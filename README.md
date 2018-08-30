@@ -5,7 +5,7 @@ SL backgrounds $`b_i`$ for signal region $`i`$ are parametrised as
 ```math
 b_i = A_i + B_i*\theta_i + C_i/2 \theta_i^2
 ```
-where the $`theta_i`$ are distributed as a multivariate normal.
+where the $`\theta_i`$ are distributed as a multivariate normal.
 
 This reference code has been written with reverse engineering and
 comprehensibility of the calculations explicitly in mind. While it computes
