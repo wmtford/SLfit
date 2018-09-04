@@ -9,10 +9,6 @@ Calculation of next-to-leading order simplified likelihood coefficients
 SL backgrounds b_i for signal region i are parametrised as
   b_i = A_i + B_i*th_i + C_i/2 * th_i^2,
 where the th_i are distributed as a multivariate normal.
-
-TODO:
- * Check marginalisation functions
- * Skew argument -> m3=None?
 """
 
 def getCoeffCi_fast(m2ii, m3iii):
@@ -58,7 +54,6 @@ def getCoeffsABC(m1, m2, m3=None, skew=True):
     "Efficiently compute all three SL coefficients for all bins"
     As, Bs, Cs = [], [], []
     if m3 is not None:
-        #m3 = np.zeros(len(m1))
         assert len(m1) == len(m3)
     assert m2.shape == tuple([len(m1), len(m1)])
     for i in range(len(m1)):
@@ -78,7 +73,6 @@ def getRhoIJ(m1i, m2ii, m3iii, m1j, m2jj, m3jjj, m2ij, skew=True):
         ci += epsilon if ci >= 0 else -epsilon
         cj += epsilon if cj >= 0 else -epsilon
         cicj = ci*cj
-        # print ci, cj, cicj
         #
         bi = getCoeffBi_fast(m2ii, ci)
         bj = getCoeffBi_fast(m2jj, cj)
@@ -95,13 +89,7 @@ def getRhoIJ(m1i, m2ii, m3iii, m1j, m2jj, m3jjj, m2ij, skew=True):
 
 def getRho(m1, m2, m3, skew=True):
     "Compute the SL correlation matrix rho"
-    # if m3 is None or m3 == 0:
-    #     bg_diagsig = np.sqrt(bg_m2.diagonal())
-    #     bg_sig = np.diag(bg_diagsig)
-    #     bg_invsig = np.diag(np.reciprocal(bg_diagsig))
-    #     bg_corr = reduce(np.matmul, [bg_invsig, BG_M2, bg_invsig])
-    #
-    # TODO: there must be a better, vectorised way to calculate this!
+    # Is there a better, vectorised way to calculate this?
     rho = np.ones(m2.shape)
     for i in range(m2.shape[0]):
         for j in range(m2.shape[1]):
@@ -187,11 +175,7 @@ class SLParams(object):
         return sbs
 
     def loglike(self, mu, thetas):
-        """Calculate the simplified log-likelihood for the given (mu, {theta}) params
-
-        TODO:
-         * Broadcast across multidimensional numpy arrays of thetas and mus
-        """
+        "Calculate the simplified log-likelihood for the given (mu, {theta}) params"
         thetas = np.array(thetas)
         import scipy.stats as st
         assert self.obs is not None
@@ -204,11 +188,7 @@ class SLParams(object):
         return ll_tot
 
     def dloglike(self, mu, thetas):
-        """Calculate the gradient vector of the simplified log-likelihood for the given (mu, {theta}) params
-
-        TODO:
-         * Broadcast across multidimensional numpy arrays of thetas and mus
-        """
+        "Calculate the gradient vector of the simplified log-likelihood for the given (mu, {theta}) params"
         thetas = np.array(thetas)
         grad = np.zeros(self.size+1)
         ## mu direction first:
@@ -226,9 +206,6 @@ class SLParams(object):
         If mu=None, the unconditional (i.e. absolute) maximum LL will be computed
         over (mu, {theta}). Otherwise, the likelihood conditional on mu wil be
         computed over {theta}.
-
-        TODO:
-         * Use asymptotic formula (as starting point)?
         """
         from scipy.optimize import minimize
         if mu is None:
@@ -256,7 +233,6 @@ class SLParams(object):
                 llopt = -calc_optll_conditional(minres.x, mu)
                 if mu == 0:
                     self.llnosig = (minres, llopt) #< mu=0 caching
-        # print llopt
         if rtnparams:
             return llopt, minres.x
         else:
