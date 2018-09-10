@@ -32,7 +32,7 @@ Citation policy
 
 When using the Simplified Likelihood framework or the reference SL code, please cite all the following papers:
 
-   - *The Simplified Likelihood framework*, A. Buckley, M. Citron, S. Fichet, S. Kraml, W. Waltenberg, N. Wardle, arXiv:1809.XXXXX
+   - *The Simplified Likelihood framework*, A. Buckley, M. Citron, S. Fichet, S. Kraml, W. Waltenberger, N. Wardle, arXiv:1809.XXXXX
 
    - *Simplified likelihood for the re-interpretation of public CMS results*, The CMS Collaboration, Tech. Rep. CMS-NOTE-2017-001
 
