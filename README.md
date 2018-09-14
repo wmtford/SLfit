@@ -1,5 +1,5 @@
-<small>The SLtools repository accompanies the paper 
-*The Simplified Likelihood framework*, **arXiv:1809.XXXXX**, by A. Buckley, M. Citron, S. Fichet, S. Kraml, W. Waltenberger and N. Wardle.</small>
+<sup>The SLtools repository accompanies the paper 
+*The Simplified Likelihood framework*, **arXiv:1809.XXXXX**, by A. Buckley, M. Citron, S. Fichet, S. Kraml, W. Waltenberger and N. Wardle.</sup>
 
 
 Reference code
