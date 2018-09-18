@@ -10,7 +10,7 @@ eq. (2.3) in arXiv:1809.05548. The expected number of backgrounds in terms of th
 ```math
   n_I = a_I + b_I \theta_I + c_I \theta_I^2
 ```
-where the `$\theta_I$` are distributed as a multivariate normal. 
+where the $\theta_I$ are distributed as a multivariate normal. 
 
 The reference code includes functions to calculate the coefficients $`a_I`$, $`b_I`$, $`c_I`$, and $`\rho_{IJ}`$ from provided moments $`m_{1,I}`$, $`m_{2,IJ}`$ and $`m_{3,I}`$, see eqs.(2.9)-(2.12) in the paper. It also includes an `SLParams` class which computes these and higher-level statistics such as profile likelihoods, log likelihood-ratios, and related limit-setting measures computed using observed and expected signal yields.
 
