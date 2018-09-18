@@ -24,10 +24,9 @@ A demo of the construction of the simplified likelihood, and profiling as a func
 
 The first step is to read the inputs from which the simplified likelihood coefficients are constructed, and the inputs to define the signal and the observed data. These inputs for the pseudo-search from arXiv:1809.05548 are contained in the python module `model-90_100000toys.py`. 
 
-For searches which have provided these inputs in the form of HepData yaml tables, simple functions can be found in `convert_yaml.py` to read the simplified likelihood directly from the yaml tables. As an example, you can download the yaml files for the pseudo-search from [this HepData repository](https://www.hepdata.net/record/sandbox/1535641814 "HepData for pseudo-search") and set `USE_YAML_FILES=True` in `simplikedemo.py`. This will invoke the use of the conversion functions `yaml_table_to_pylist` and `yaml_multi_table_to_pylist` for the pseudo-search. 
-The user of this package is advised to use the official conversion tools for parsing HepData inputs from experimental results, which are 
-available [here](https://github.com/HEPData/hepdata-converter/tree/master/hepdata_converter/parsers). 
+For searches which have provided these inputs in the form of HepData yaml tables, simple functions can be found in `convert_yaml.py` to read the simplified likelihood directly from the yaml tables. As an example, you can download the yaml files for the pseudo-search from [this HepData repository](https://www.hepdata.net/record/sandbox/1535641814 "HepData for pseudo-search") and set `USE_YAML_FILES=True` in `simplikedemo.py`. This will invoke the use of the conversion functions `yaml_table_to_pylist` and `yaml_multi_table_to_pylist` for the pseudo-search$`^\dagger`$. 
 
+<sub>$`^\dagger`$For wider usage, we recommend to adopt the official conversion tools for parsing HepData inputs from experimental results, which are available [here](https://github.com/HEPData/hepdata-converter/tree/master/hepdata_converter/parsers).</sub>
 
 Citation policy
 -------------------------------------------------------------------------
