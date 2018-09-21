@@ -6,12 +6,12 @@ USE_YAML_FILES = False
 if USE_YAML_FILES:
   ## Load data from .yaml files
   from convert_yaml import *
-  data   = yaml_table_to_pylist("HEPData-1535641814-v1-yaml/Table_1.yaml", 0)              # Table 1 contains data, signal 
-  signal = yaml_table_to_pylist("HEPData-1535641814-v1-yaml/Table_1.yaml", 1)        
+  data   = yaml_table_to_pylist("HEPData-1535641814-v1-yaml/Table_1.yaml", 0)              # Table 1 contains data, signal
+  signal = yaml_table_to_pylist("HEPData-1535641814-v1-yaml/Table_1.yaml", 1)
   background = yaml_table_to_pylist("HEPData-1535641814-v1-yaml/Table_2.yaml", 0)          # Table 2 contains the m_1 values
   covariance   = yaml_multi_table_to_pylist("HEPData-1535641814-v1-yaml/Table_3.yaml")     # Table 3 contains the m_2 matrix
   third_moment = yaml_table_to_pylist("HEPData-1535641814-v1-yaml/Table_4.yaml", 0)        # Table 4 contains the m_3 values
-  
+
 else:
   ## Alternatively, load data from a pre-prepared python module into the SL params objects
   execfile("model-90_100000toys.py")
@@ -36,7 +36,7 @@ plt.annotate("68%", xy=(0.0, 1+0.2), color="gray")
 plt.axhline(3.84, linestyle=":", color="gray")
 plt.annotate("95%", xy=(0.0, 3.84+0.2), color="gray")
 ## Likelihood lines
-plt.plot(mustrue, tmustrue, "-", color="black", label="Full likelihood")
+plt.plot(mus, tmustrue, "-", color="black", label="Full likelihood")
 plt.plot(mus, tmus1, "--", color="red", label="Simplified likelihood (linear)")
 plt.plot(mus, tmus2, "--", color="green", label="Simplified likelihood (quadratic)")
 plt.legend(loc="best")
