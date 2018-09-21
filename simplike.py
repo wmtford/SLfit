@@ -6,9 +6,26 @@ import numpy as np
 """
 Calculation of Simplified Likelihood parameters
 
-SL backgrounds b_i for signal region i are parametrised as
-  n_{b,i} = a_i + b_i*th_i + c_i * th_i^2,
-where the th_i are distributed as a multivariate normal.
+Accompanying code implementation for the paper
+  "The Simplified Likelihood framework", arXiv:1809.05548
+  https://arxiv.org/abs/1809.05548
+by A. Buckley, M. Citron, S. Fichet, S. Kraml, W. Waltenberger and N. Wardle
+
+The expected backgrounds in terms of the combined nuisance parameters
+are parameterized as n_I = a_I + b_I theta_I + c_I theta_I^2
+where the nuisances, theta_I, are distributed as a multivariate normal.
+
+This reference code includes functions to calculate the coefficients a_I,
+b_I, c_I, and rho_IJ from provided moments m_1,I, m_2,IJ and m_3,I,
+cf. eqs.(2.9)-(2.12) in the paper. It also includes an SLParams class
+which computes these and higher-level statistics such as profile likelihoods,
+log likelihood-ratios, and related limit-setting measures computed
+using observed and expected signal yields.
+
+**Note:** this code has been written with reverse engineering and
+comprehensibility of the calculations explicitly in mind. While it computes
+likelihood statistics on a reasonable timescale, further (but less readable)
+optimisations can be added for production code.
 """
 
 def getCoeffCi_fast(m2ii, m3iii):
@@ -66,7 +83,7 @@ def getCoeffsABC(m1, m2, m3=None, skew=True):
 
 def getRhoIJ(m1i, m2ii, m3iii, m1j, m2jj, m3jjj, m2ij, skew=True):
     "Compute the SL correlation matrix element rho_ij"
-    if skew and (m3iii or m3jjj): 
+    if skew and (m3iii or m3jjj):
         epsilon = 1e-5
         ci = getCoeffCi_fast(m2ii, m3iii)
         cj = getCoeffCi_fast(m2jj, m3jjj)
