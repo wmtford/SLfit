@@ -14,7 +14,7 @@ if USE_YAML_FILES:
 
 else:
   ## Alternatively, load data from a pre-prepared python module into the SL params objects
-  execfile("model-90_100000toys.py")
+  exec(open("model-90_100000toys.py").read())
 
 slp1 = sl.SLParams(background, covariance, obs=data, sig=signal)
 slp2 = sl.SLParams(background, covariance, third_moment, obs=data, sig=signal)
