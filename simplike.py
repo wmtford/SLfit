@@ -129,6 +129,13 @@ class SLParams(object):
         self.bg_m3 = np.array(bg_m3) if bg_m3 is not None else None
         self.obs = np.array(obs) if obs is not None else None
         self.sig = np.array(sig) if sig is not None else None
+        # print("Inputs:")
+        # print("bkg:"); print(self.bg_m1)
+        # print("covariance:"); print(self.bg_m2)
+        # print("m3:\n"); print(self.bg_m3)
+        # print("obs:\n"); print(self.obs)
+        # print("sig:\n"); print(self.sig)
+        # print()
         #
         self.aparams, self.bparams, self.cparams = getCoeffsABC(self.bg_m1, self.bg_m2, self.bg_m3, skew=skew)
         self.rhoparams = getRho(self.bg_m1, self.bg_m2, self.bg_m3, skew=skew)
@@ -151,7 +158,7 @@ class SLParams(object):
         "Expected background rates in all bins, for SL nuisance vector thetas"
         thetas = np.array(thetas)
         bs = np.array([self.expbi(i, th) for (i, th) in enumerate(thetas)])
-        bs[bs <= 0] = 1e-3 #< force any negatives to ~0
+        # bs[bs <= 0] = 1e-3 #< force any negatives to ~0
         return bs
 
     def expsi(self, i, mu):
@@ -223,7 +230,24 @@ class SLParams(object):
         over (mu, {theta}). Otherwise, the likelihood conditional on mu wil be
         computed over {theta}.
         """
-        from scipy.optimize import minimize
+        from scipy.optimize import minimize, NonlinearConstraint
+        thetas_ini = [0 for _ in range(self.size)]
+        thetas_ini[10] = 3
+        mu_thetas_ini = [0]
+        mu_thetas_ini += thetas_ini
+
+        def constr_mu_thetas(mu_thetas):
+            exprs = []
+            for i, th in enumerate(mu_thetas[1:]):
+                exprs.append(self.expbi(i, th))
+            return exprs
+
+        def constr_thetas(thetas):
+            exprs = []
+            for i, th in enumerate(thetas):
+                exprs.append(self.expbi(i, th))
+            return exprs
+
         if mu is None:
             if self.llmax is not None: #< return cached value if available
                 minres, llopt = self.llmax
@@ -232,10 +256,16 @@ class SLParams(object):
                     return -self.loglike(mu_thetas[0], mu_thetas[1:])
                 def calc_gradll_unconditional(mu_thetas):
                     return -self.dloglike(mu_thetas[0], mu_thetas[1:])
-                minres = minimize(calc_optll_unconditional, [0 for _ in range(self.size+1)],
-                                  jac=calc_gradll_unconditional)
+                minres = minimize(calc_optll_unconditional, mu_thetas_ini,
+                                  jac=calc_gradll_unconditional, method = 'trust-constr', constraints = NonlinearConstraint(constr_mu_thetas, 0, np.inf))
+                # minres = minimize(calc_optll_unconditional, [0 for _ in range(self.size+1)],
+                #                   jac=calc_gradll_unconditional)
                 llopt = -calc_optll_unconditional(minres.x)
                 self.llmax = (minres, llopt)
+                print("maxloglike:  success flag = "+str(minres.success)+", mimimum = "+str(llopt)+", params at minimum:")
+                print(str(minres.x))
+                if not minres.success:
+                    print(minres)
         else:
             if mu == 0 and self.llnosig is not None:
                 minres, llopt = self.llnosig #< use mu=0 cache
@@ -244,11 +274,15 @@ class SLParams(object):
                     return -self.loglike(mu, thetas)
                 def calc_gradll_conditional(thetas, mu):
                     return -self.dloglike(mu, thetas)[1:]
-                minres = minimize(calc_optll_conditional, np.zeros(self.size),
-                                  jac=calc_gradll_conditional, args=(mu,))
+                minres = minimize(calc_optll_conditional, thetas_ini,
+                                  jac=calc_gradll_conditional, method = 'trust-constr', constraints = NonlinearConstraint(constr_thetas, 0, np.inf), args=(mu,))
+                # minres = minimize(calc_optll_conditional, np.zeros(self.size),
+                #                   jac=calc_gradll_conditional, args=(mu,))
                 llopt = -calc_optll_conditional(minres.x, mu)
                 if mu == 0:
                     self.llnosig = (minres, llopt) #< mu=0 caching
+            if not minres.success:
+                print("mu = "+"{:6.2f}".format(mu)+", fit success = "+str(minres.success))
         if rtnparams:
             return llopt, minres.x
         else:
@@ -284,7 +318,8 @@ if __name__ == "__main__":
     # NBINS = len(BG_M1)
 
     ## Load data from the model script
-    execfile("model-90_100000toys.py")
+    # execfile("model-90_100000toys.py")
+    exec(open("./model-90_100000toys.py").read())
     NBINS = nbins
     BG_M1 = np.array(background)
     BG_M2 = np.array(covariance).reshape([NBINS,NBINS]) #!
@@ -302,25 +337,29 @@ if __name__ == "__main__":
     tmus1 = [slp1.tmu(mu) for mu in mus]
     tmus2 = [slp2.tmu(mu) for mu in mus]
 
+    print("   mu      tmuSYMM   tmuASYMM")
+    for i in range(len(mus)):
+        print(str(mus[i])+"   "+str(tmus1[i])+"   "+str(tmus2[i]))
+
     ## Compare to true t_mu values computed from full likelihood
     mustrue = np.linspace(0,1,16+1)
     tmustrue = [0.0009691, 0.0411193, 0.1329959, 0.2649894, 0.4527930, 0.6973918, 0.9997511, 1.3608103, 1.7814781, 2.2626238, 2.8050761, 3.4096148, 4.0769662, 4.8079994, 5.6025722, 6.4611683, 7.3840528]
 
-    ## Plot
-    from matplotlib import pyplot as plt
-    plt.figure()
-    plt.axhline(st.chi2.ppf(0.68, 1), linestyle=":", color="gray")
-    plt.annotate("68%", xy=(0.0, st.chi2.ppf(0.68,1)+0.2), color="gray")
-    plt.axhline(st.chi2.ppf(0.95, 1), linestyle=":", color="gray")
-    plt.annotate("95%", xy=(0.0, st.chi2.ppf(0.95,1)+0.2), color="gray")
-    #
-    plt.plot(mustrue, tmustrue, "-", color="black", label="Full likelihood")
-    plt.plot(mus, tmus1, "--", color="red", label="Simplified likelihood (linear)")
-    plt.plot(mus, tmus2, "--", color="green", label="Simplified likelihood (quadratic)")
-    plt.legend(loc="best")
-    #
-    plt.xlabel(r"Signal strength $\mu$")
-    plt.ylabel(r"$t_\mu = -2 \Delta \ln L$")
-    plt.tight_layout()
-    plt.savefig("testtoy-tmuscan.pdf")
-    plt.close()
+    # ## Plot
+    # from matplotlib import pyplot as plt
+    # plt.figure()
+    # plt.axhline(st.chi2.ppf(0.68, 1), linestyle=":", color="gray")
+    # plt.annotate("68%", xy=(0.0, st.chi2.ppf(0.68,1)+0.2), color="gray")
+    # plt.axhline(st.chi2.ppf(0.95, 1), linestyle=":", color="gray")
+    # plt.annotate("95%", xy=(0.0, st.chi2.ppf(0.95,1)+0.2), color="gray")
+    # #
+    # plt.plot(mustrue, tmustrue, "-", color="black", label="Full likelihood")
+    # plt.plot(mus, tmus1, "--", color="red", label="Simplified likelihood (linear)")
+    # plt.plot(mus, tmus2, "--", color="green", label="Simplified likelihood (quadratic)")
+    # plt.legend(loc="best")
+    # #
+    # plt.xlabel(r"Signal strength $\mu$")
+    # plt.ylabel(r"$t_\mu = -2 \Delta \ln L$")
+    # plt.tight_layout()
+    # plt.savefig("testtoy-tmuscan.pdf")
+    # plt.close()
